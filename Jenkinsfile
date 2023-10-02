@@ -18,11 +18,32 @@ pipeline {
             }
         }
 
+        stage('Analyze Changed Files') {
+        steps {
+            script {
+                // Get the list of changed files
+                sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
+                echo 'List of changed files:'
+                sh 'cat changed_files.txt'
+            }
+        }
+    }
+
+
         stage('Install Dependencies') {
             steps {
                 // Install project dependencies
                 sh 'npm install'
                 echo 'Installed project dependencies.'
+            }
+        }
+
+        stage('Run Generated Unit Tests') {
+            steps {
+                    // Run the Angular unit tests
+                    sh 'ng test --watch=false'
+                    echo 'Ran the generated unit tests.'
+              
             }
         }
 
@@ -33,15 +54,6 @@ pipeline {
                     sh 'python3 generate_tests.py'
                     echo 'Generated unit tests.'
                 }
-            }
-        }
-
-        stage('Run Generated Unit Tests') {
-            steps {
-                    // Run the Angular unit tests
-                    sh 'ng test --watch=false'
-                    echo 'Ran the generated unit tests.'
-              
             }
         }
 
