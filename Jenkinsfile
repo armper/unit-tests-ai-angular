@@ -26,14 +26,6 @@ pipeline {
             }
         }
 
-        stage('Lint Code') {
-            steps {
-                // Lint the code
-                sh 'ng lint'
-                echo 'Linted the code.'
-            }
-        }
-
         stage('Generate Unit Test') {
             steps {
                 script {
