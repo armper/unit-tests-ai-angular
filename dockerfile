@@ -12,6 +12,7 @@ RUN apt-get update && \
 
 # Verify that Node.js and npm were installed correctly
 RUN node -v && npm -v
+RUN npm install -g @angular/cli
 
 # Create a virtual environment
 RUN python3 -m venv /opt/venv
