@@ -96,6 +96,10 @@ pipeline {
                             }
                         }
 
+                        // Log the current git status
+                        echo 'Logging git status:'
+                        sh 'git status'
+
                         // Use credentials to push to the branch
                         withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                             sh '''
