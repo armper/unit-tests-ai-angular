@@ -107,6 +107,9 @@ pipeline {
         # Fetch the latest changes from the remote repository
         git fetch origin
 
+        # Stash any unstaged changes
+        git stash push -m "Stashing unstaged changes before rebase"
+
         # Replay your local commits on top of the latest changes from the remote repository
         git rebase origin/main
 
