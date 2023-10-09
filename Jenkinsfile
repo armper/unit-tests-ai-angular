@@ -6,17 +6,25 @@ pipeline {
     }
 
     stages {
-        stage('Clean Workspace and Checkout') {
-            steps {
-                // Clean the Jenkins workspace
-                deleteDir()
-                echo 'Cleaned the Jenkins workspace.'
+       stage('Clean Workspace and Checkout') {
+    steps {
+        // Clean the Jenkins workspace
+        deleteDir()
+        echo 'Cleaned the Jenkins workspace.'
 
-                // Checkout your code from the feature branch
-                checkout scm
-                echo 'Checked out the code.'
-            }
-        }
+        // Checkout your code from the feature branch
+        checkout scm
+        echo 'Checked out the code.'
+
+        // Fetch the latest changes and reset to the latest commit
+        sh '''
+            git fetch origin
+            git reset --hard origin/main
+        '''
+        echo 'Reset to the latest commit from the remote branch.'
+    }
+}
+
 
         stage('Analyze Changed Files') {
             steps {
