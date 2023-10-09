@@ -105,18 +105,19 @@ sh 'git status'
 // Use credentials to push to the branch
 withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
     sh '''
-        // Fetch the latest changes from the remote repository
+        # Fetch the latest changes from the remote repository
         git fetch origin
 
-        // Replay your local commits on top of the latest changes from the remote repository
+        # Replay your local commits on top of the latest changes from the remote repository
         git rebase origin/${env.GIT_BRANCH}
 
-        // Push your changes
+        # Push your changes
         git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:${env.GIT_BRANCH}
     '''
 }
 
 echo 'Committed and pushed the generated tests.'
+
 
                     }
                 }
