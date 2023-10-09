@@ -19,15 +19,15 @@ pipeline {
         }
 
         stage('Analyze Changed Files') {
-        steps {
-            script {
-                // Get the list of changed files
-                sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
-                echo 'List of changed files:'
-                sh 'cat changed_files.txt'
+            steps {
+                script {
+                    // Get the list of changed files
+                    sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
+                    echo 'List of changed files:'
+                    sh 'cat changed_files.txt'
+                }
             }
         }
-    }
 
         stage('Install Dependencies') {
             steps {
@@ -42,7 +42,6 @@ pipeline {
                     // Run the Angular unit tests
                     sh 'ng test --watch=false'
                     echo 'Ran the generated unit tests.'
-              
             }
         }
 
@@ -65,65 +64,63 @@ pipeline {
         }
 
         stage('Commit and Push Generated Test') {
-            steps {
-                script {
-                    // Read the paths from the file
-                    def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
+    steps {
+        script {
+            // Read the paths from the file
+            def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
 
-                    // Convert the array to a List if it's a primitive array
-                    if (testFilePaths instanceof String[]) {
-                        testFilePaths = testFilePaths.toList()
-                    }
+            // Convert the array to a List if it's a primitive array
+            if (testFilePaths instanceof String[]) {
+                testFilePaths = testFilePaths.toList()
+            }
 
-                    if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
-                        echo 'No files to commit and push.'
+            if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
+                echo 'No files to commit and push.'
+            } else {
+                testFilePaths.each { path ->
+                    if (path.trim()) { // Check if the path is not empty or just whitespaces
+                        echo "Path to the generated test file: ${path}"
+
+                        // Set Git user name and email
+                        sh 'git config user.email "aleoperea@yahoo.com"'
+                        sh 'git config user.name "Jenkins AI"'
+
+                        // Add the file to git
+                        sh "git add ${path}"
+
+                        // Commit
+                        sh 'git commit -m "Add or update generated unit test for feature XYZ"'
                     } else {
-                        testFilePaths.each { path ->
-                            if (path.trim()) { // Check if the path is not empty or just whitespaces
-                                echo "Path to the generated test file: ${path}"
+                        echo 'Skipping empty path.'
+                    }
+                }
 
-                                // Set Git user name and email
-                                sh 'git config user.email "aleoperea@yahoo.com"'
-                                sh 'git config user.name "Jenkins AI"'
+                sh "git checkout main" // Switch to the main branch
 
-                                // Add the file to git
-                                sh "git add ${path}"
+                // Log the current git status
+                echo 'Logging git status:'
+                sh 'git status'
 
-                                // Commit
-                                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
-                            } else {
-                                echo 'Skipping empty path.'
-                            }
-                        }
-
-                       sh "git checkout ${env.GIT_BRANCH}"
-
-// Log the current git status
-echo 'Logging git status:'
-sh 'git status'
-
-// Use credentials to push to the branch
-withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-    sh '''
+                // Use credentials to push to the branch
+                withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh '''
         # Fetch the latest changes from the remote repository
         git fetch origin
 
         # Replay your local commits on top of the latest changes from the remote repository
-        git rebase origin/${env.GIT_BRANCH}
+        git rebase origin/main
 
         # Push your changes
-        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:${env.GIT_BRANCH}
+        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
     '''
-}
-
-echo 'Committed and pushed the generated tests.'
-
-
-                    }
                 }
+
+                echo 'Committed and pushed the generated tests.'
             }
         }
+    }
+}
 
-        // Other stages (e.g., deploy) as needed
+    // Other stages (e.g., deploy) as needed
     }
 }
