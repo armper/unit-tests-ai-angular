@@ -96,12 +96,13 @@ pipeline {
                             }
                         }
 
-                        // Use credentials to push to the branch
-                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                            sh '''
-                                git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                            '''
-                        }
+                         // Use credentials to pull the latest changes and then push
+            withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                sh '''
+                    git pull --rebase https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git main
+                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
+                '''
+            }
 
                         echo 'Committed and pushed the generated tests.'
                     }
