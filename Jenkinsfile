@@ -96,20 +96,28 @@ pipeline {
                             }
                         }
 
-                        sh "git checkout ${env.GIT_BRANCH}"
+                       sh "git checkout ${env.GIT_BRANCH}"
 
-                        // Log the current git status
-                        echo 'Logging git status:'
-                        sh 'git status'
+// Log the current git status
+echo 'Logging git status:'
+sh 'git status'
 
-                        // Use credentials to push to the branch
-                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                            sh '''
-                                git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                            '''
-                        }
+// Use credentials to push to the branch
+withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+    sh '''
+        // Fetch the latest changes from the remote repository
+        git fetch origin
 
-                        echo 'Committed and pushed the generated tests.'
+        // Replay your local commits on top of the latest changes from the remote repository
+        git rebase origin/${env.GIT_BRANCH}
+
+        // Push your changes
+        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:${env.GIT_BRANCH}
+    '''
+}
+
+echo 'Committed and pushed the generated tests.'
+
                     }
                 }
             }
