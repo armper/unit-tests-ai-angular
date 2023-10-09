@@ -59,7 +59,7 @@ pipeline {
         stage('Build Project') {
             steps {
                 // Build the Angular project
-                sh 'ng build --prod'
+                sh 'ng build --configuration production'
                 echo 'Built the Angular project.'
             }
         }
