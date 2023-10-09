@@ -96,10 +96,12 @@ pipeline {
                             }
                         }
 
-                         // Use credentials to pull the latest changes and then push
+                          // Use credentials to pull the latest changes and then push
             withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 sh '''
+                    git stash  # Stash any unstaged changes
                     git pull --rebase https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git main
+                    git stash pop  # Apply the stashed changes
                     git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
                 '''
             }
