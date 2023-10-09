@@ -98,11 +98,10 @@ pipeline {
 
                             // Use credentials to push the changes
             withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                sh '''
-                    git reset --hard HEAD  # Discard any unstaged changes
-                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                '''
-            }
+    sh '''
+        git push --force https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
+    '''
+}
 
                         echo 'Committed and pushed the generated tests.'
                     }
