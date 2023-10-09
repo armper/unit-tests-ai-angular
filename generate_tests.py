@@ -80,6 +80,10 @@ with open('changed_files.txt', 'r') as file:
 for component_path in changed_files:
     component_path = component_path.strip()  # Remove newline characters
 
+    # Skip if the file is a spec.ts file
+    if component_path.endswith('.spec.ts'):
+        continue
+
     associated_file_content = None
 
     # Check if the file is a .ts file and if there's an associated .html file
