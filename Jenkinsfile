@@ -96,9 +96,8 @@ pipeline {
                             }
                         }
 
-                        echo "checking out git branch: ${BRANCH_NAME}"
-                        sh "git checkout ${BRANCH_NAME}"
-
+                        echo "checking out git branch: ${env.BRANCH_NAME}"
+                        sh "git checkout ${env.BRANCH_NAME}"
 
                         // Log the current git status
                         echo 'Logging git status:'
