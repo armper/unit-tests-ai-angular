@@ -98,8 +98,8 @@ pipeline {
 
 sh 'printenv'
 
-                        echo "checking out git branch: ${env.BRANCH_NAME}"
-                        sh "git checkout ${env.BRANCH_NAME}"
+                        echo "checking out git branch: ${env.GIT_BRANCH}"
+                        sh "git checkout ${env.GIT_BRANCH}"
 
                         // Log the current git status
                         echo 'Logging git status:'
