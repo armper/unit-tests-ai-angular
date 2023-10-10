@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+.changed_files.txt
+.generated_test_path.txt
