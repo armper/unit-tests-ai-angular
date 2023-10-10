@@ -67,23 +67,57 @@ pipeline {
         stage('Commit and Push Generated Test') {
             steps {
                 script {
-            // ... [rest of your code before the checkout]
+                    // Read the paths from the file
+                    def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
 
-                    echo "checking out git branch: ${env.GIT_BRANCH}"
-                    def localBranchName = env.GIT_BRANCH.split('/')[-1]
-                    sh "git checkout -B ${localBranchName}"
+                    // Convert the array to a List if it's a primitive array
+                    if (testFilePaths instanceof String[]) {
+                        testFilePaths = testFilePaths.toList()
+                    }
 
-            // ... [rest of your code between checkout and push]
+                    if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
+                        echo 'No files to commit and push.'
+            } else {
+                        testFilePaths.each { path ->
+                            if (path.trim()) { // Check if the path is not empty or just whitespaces
+                                echo "Path to the generated test file: ${path}"
 
-                    sh """
-            git pull --rebase
-            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git ${localBranchName}
-            """
+                                // Set Git user name and email
+                                sh 'git config user.email "aleoperea@yahoo.com"'
+                                sh 'git config user.name "Jenkins AI"'
 
-                    echo 'Committed and pushed the generated tests.'
+                                // Add the file to git
+                                sh "git add ${path}"
+
+                                // Commit
+                                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                    } else {
+                                echo 'Skipping empty path.'
+                            }
+                        }
+
+                        sh 'printenv'
+
+                        echo "checking out git branch: ${env.GIT_BRANCH}"
+                        def localBranchName = env.GIT_BRANCH.split('/')[-1]
+                        sh "git checkout -B ${localBranchName}"
+
+                        // Log the current git status
+                        echo 'Logging git status:'
+                        sh 'git status'
+
+                        // Use credentials to push to the branch
+                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                            sh """
+                    git pull --rebase
+                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git ${localBranchName}
+                    """
+                        }
+
+                        echo 'Committed and pushed the generated tests.'
+                    }
                 }
             }
-
         }
 
     // Other stages (e.g., deploy) as needed
