@@ -29,7 +29,14 @@ pipeline {
             }
         }
 
-      
+        stage('Install Dependencies') {
+            steps {
+                // Install project dependencies
+                sh 'npm install'
+                echo 'Installed project dependencies.'
+            }
+        }
+
         stage('Run Generated Unit Tests') {
             steps {
                     // Run the Angular unit tests
