@@ -96,6 +96,8 @@ pipeline {
                             }
                         }
 
+sh 'printenv'
+
                         echo "checking out git branch: ${env.BRANCH_NAME}"
                         sh "git checkout ${env.BRANCH_NAME}"
 
