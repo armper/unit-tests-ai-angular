@@ -29,14 +29,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                // Install project dependencies
-                sh 'npm install'
-                echo 'Installed project dependencies.'
-            }
-        }
-
+      
         stage('Run Generated Unit Tests') {
             steps {
                     // Run the Angular unit tests
@@ -102,7 +95,7 @@ pipeline {
                         // Use credentials to push to the branch
                         withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                             sh '''
-        # Push your changes
+        # Push changes
         git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git
     '''
                         }
