@@ -112,14 +112,9 @@ pipeline {
                 // Use credentials to push to the branch
                 withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
-        # Fetch the latest changes from the remote repository
-        git fetch origin
-
-        # Stash any unstaged changes
-        git stash push -m "Stashing unstaged changes before rebase"
-
-        # Replay your local commits on top of the latest changes from the remote repository
-        git rebase origin/main
+        git checkout main
+git fetch origin
+git reset --hard origin/main
 
         # Push your changes
         git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
