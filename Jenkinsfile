@@ -108,13 +108,11 @@ pipeline {
 
                         // Use credentials to push to the branch
                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-    sh '''
-    git stash
-    export GIT_CREDENTIALS="https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git"
-    '''
+    sh 'git stash'
     sh "git pull --rebase origin ${localBranchName}"
-    sh "git push $GIT_CREDENTIALS ${localBranchName}"
+    sh "git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git ${localBranchName}"
 }
+
 
 
 
