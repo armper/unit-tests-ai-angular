@@ -55,14 +55,14 @@ pipeline {
                     echo 'Ran the generated unit tests.'
             }
         }
-
+/* 
         stage('Build Project') {
             steps {
                 // Build the Angular project
                 sh 'ng build --configuration production'
                 echo 'Built the Angular project.'
             }
-        }
+        } */
 
         stage('Commit and Push Generated Test') {
             steps {
@@ -77,7 +77,7 @@ pipeline {
 
                     if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
                         echo 'No files to commit and push.'
-            } else {
+        } else {
                         testFilePaths.each { path ->
                             if (path.trim()) { // Check if the path is not empty or just whitespaces
                                 echo "Path to the generated test file: ${path}"
@@ -91,31 +91,17 @@ pipeline {
 
                                 // Commit
                                 sh 'git commit -m "Add or update generated unit test for feature XYZ"'
-                    } else {
+                } else {
                                 echo 'Skipping empty path.'
                             }
                         }
 
-                        sh 'printenv'
-
-                        echo "checking out git branch: ${env.GIT_BRANCH}"
-                        def localBranchName = env.GIT_BRANCH.split('/')[-1]
-                        sh "git checkout -B ${localBranchName}"
-
-                        // Log the current git status
-                        echo 'Logging git status:'
-                        sh 'git status'
-
                         // Use credentials to push to the branch
-                       withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-    sh 'git stash'
-    sh "git pull --rebase origin ${localBranchName}"
-    sh "git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git ${localBranchName}"
-}
-
-
-
-
+                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                            sh '''
+                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
+                '''
+                        }
 
                         echo 'Committed and pushed the generated tests.'
                     }
