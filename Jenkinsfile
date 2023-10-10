@@ -22,6 +22,7 @@ pipeline {
             steps {
                 script {
                     // Get the list of changed files
+                    sh 'git fetch'
                     sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
                     echo 'List of changed files:'
                     sh 'cat changed_files.txt'
@@ -37,14 +38,6 @@ pipeline {
             }
         }
 
-        stage('Run Generated Unit Tests') {
-            steps {
-                    // Run the Angular unit tests
-                    sh 'ng test --watch=false'
-                    echo 'Ran the generated unit tests.'
-            }
-        }
-
         stage('Generate Unit Test') {
             steps {
                 script {
@@ -52,6 +45,14 @@ pipeline {
                     sh 'python3 generate_tests.py'
                     echo 'Generated unit tests.'
                 }
+            }
+        }
+
+        stage('Run Generated Unit Tests') {
+            steps {
+                    // Run the Angular unit tests
+                    sh 'ng test --watch=false'
+                    echo 'Ran the generated unit tests.'
             }
         }
 
@@ -102,6 +103,7 @@ pipeline {
                         // Use credentials to push to the branch
                         withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                             sh '''
+        git pull
         # Push changes
         git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git
     '''
