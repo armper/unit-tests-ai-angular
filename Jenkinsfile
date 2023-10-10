@@ -107,15 +107,15 @@ pipeline {
                         sh 'git status'
 
                         // Use credentials to push to the branch
-                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                sh '''
-                git stash
-                export GIT_CREDENTIALS="https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git"
-                git pull --rebase
-                git stash apply
-                git push $GIT_CREDENTIALS ${localBranchName}
-                '''
-            }
+                       withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+    sh '''
+    git stash
+    export GIT_CREDENTIALS="https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git"
+    '''
+    sh "git pull --rebase origin ${localBranchName}"
+    sh 'git push $GIT_CREDENTIALS ${localBranchName}'
+}
+
 
 
                         echo 'Committed and pushed the generated tests.'
