@@ -1,0 +1,9 @@
+generate_tests.py
+src/app/app.component.html
+src/app/app.component.spec.ts
+generate_tests.py
+src/app/app.component.spec.ts
+src/app/app.component.spec.ts
+src/app/app.component.spec.ts
+src/app/app.component.spec.ts
+src/app/app.component.spec.ts

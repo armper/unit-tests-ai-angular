@@ -1,5 +1,6 @@
 import openai
 import os
+import json
 
 def call_openai_to_generate_test(component_code, associated_file_content=None, existing_test_code=None):
     # Set the API key
@@ -25,6 +26,10 @@ def call_openai_to_generate_test(component_code, associated_file_content=None, e
         }
     ]
 
+    # Print the message to be sent to ChatGPT
+    print("Sending to ChatGPT:")
+    print(json.dumps(messages, indent=4).replace('\\n', '\n'))
+
     # Call ChatGPT
     response = openai.ChatCompletion.create(
         model="gpt-4", messages=messages,
@@ -42,6 +47,7 @@ def call_openai_to_generate_test(component_code, associated_file_content=None, e
     else:
         print("Failed to generate test code.")
         return None
+
 
 def generate_tests_for_component(component_path, associated_file_content=None):
     # Determine the base path for the test file
@@ -72,35 +78,37 @@ def generate_tests_for_component(component_path, associated_file_content=None):
     # Return the path for use in the Jenkins pipeline
     return test_base_path
 
+
 # Read the changed files from the file generated earlier in the Jenkins pipeline
 with open('changed_files.txt', 'r') as file:
-    changed_files = file.readlines()
+    changed_files = [path.strip() for path in file.readlines()]
+
+# Use sets for efficient membership checking
+processed_files = set()
 
 # Iterate through the changed files and generate tests for each Angular component
 for component_path in changed_files:
-    component_path = component_path.strip()  # Remove newline characters
-
-    # Skip if the file is a spec.ts file
-    if component_path.endswith('.spec.ts'):
+    # Skip if the file is not an Angular .ts file, is a spec.ts file, or has already been processed
+    if (not component_path.endswith('.ts') or component_path.endswith('.spec.ts') or component_path in processed_files):
         continue
 
     associated_file_content = None
+    associated_file_path = None
 
-    # Check if the file is a .ts file and if there's an associated .html file
-    if component_path.endswith('.ts') and not component_path.endswith('.spec.ts'):
-        associated_html_path = component_path.replace('.ts', '.html')
-        if os.path.exists(associated_html_path):
-            with open(associated_html_path, 'r') as file:
-                associated_file_content = file.read()
+    # Check if there's an associated .html file for the .ts file
+    associated_html_path = component_path.replace('.ts', '.html')
+    if associated_html_path in changed_files:
+        with open(associated_html_path, 'r') as file:
+            associated_file_content = file.read()
+        associated_file_path = associated_html_path
 
-    # Check if the file is an .html file and if there's an associated .ts file
-    elif component_path.endswith('.html'):
-        associated_ts_path = component_path.replace('.html', '.ts')
-        if os.path.exists(associated_ts_path):
-            with open(associated_ts_path, 'r') as file:
-                associated_file_content = file.read()
+    # If an associated .html file exists, mark it as processed
+    if associated_file_path:
+        processed_files.add(associated_file_path)
 
-    test_file_path = generate_tests_for_component(component_path, associated_file_content)
+    # Send the .ts file and its associated .html file content (if available) to OpenAI
+    test_file_path = generate_tests_for_component(
+        component_path, associated_file_content)
     if test_file_path:
         # Write the path to a file for use in the Jenkins pipeline
         with open('generated_test_path.txt', 'a') as file:
