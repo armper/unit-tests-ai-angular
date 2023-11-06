@@ -7,7 +7,7 @@ import { Patient } from './patient';
   styleUrls: ['./patient.component.css']
 })
 export class PatientComponent {
-  @Input() patient!: Patient; 
+  @Input() patient: Patient = { name: '', details: '' }; 
   @Output() patientUpdated = new EventEmitter<Patient>(); // Emit updated patient data
   isEditMode: boolean = false;
 

@@ -1,14 +1,14 @@
 <div *ngIf="!isEditMode">
     <!-- Read-only view -->
-    <p>{{ patient.name }}</p>
-    <p>{{ patient.details }}</p>
+    <p>Patient Name: {{ patient.name }}</p>
+    <p>Details: {{ patient.details }}</p>
     <button (click)="toggleEditMode()">Edit</button>
   </div>
   
   <div *ngIf="isEditMode">
     <!-- Editable view -->
-    <input [(ngModel)]="patient.name" />
-    <input [(ngModel)]="patient.details" />
+    <input data-testid = "name" [(ngModel)]="patient.name" />
+    <input data-testid="details" [(ngModel)]="patient.details" />
     <button (click)="saveChanges()">Save</button>
     <button (click)="toggleEditMode()">Cancel</button>
   </div>
