@@ -1,6 +1,10 @@
 import openai
 import os
 import json
+import tiktoken
+
+import re
+
 
 def call_openai_to_generate_test(component_code, associated_file_content=None, existing_test_code=None):
     # Set the API key
@@ -26,13 +30,29 @@ def call_openai_to_generate_test(component_code, associated_file_content=None, e
         }
     ]
 
+    # Integrate tiktoken
+    encoder = tiktoken.encoding_for_model("gpt-4")
+    num_tokens = len(encoder.encode(json.dumps(messages)))
+
+    print(f"Number of tokens in the message: {num_tokens}")
+
+    # Check if tokens exceed some limit (you can set a threshold)
+    TOKEN_LIMIT = 2048
+    if num_tokens > TOKEN_LIMIT:
+        print(
+            f"Error: Message too long ({num_tokens} tokens). Maximum allowed is {TOKEN_LIMIT}.")
+        return None
+
     # Print the message to be sent to ChatGPT
-    print("Sending to ChatGPT:")
+    print("\nSending to ChatGPT:")
+    print("---------------------------------------------")
     print(json.dumps(messages, indent=4).replace('\\n', '\n'))
+    print("---------------------------------------------\n")
 
     # Call ChatGPT
     response = openai.ChatCompletion.create(
-        model="gpt-4", messages=messages,
+        model="gpt-4",
+        messages=messages,
         temperature=0,
         top_p=1,
         frequency_penalty=0,
@@ -49,6 +69,25 @@ def call_openai_to_generate_test(component_code, associated_file_content=None, e
         return None
 
 
+def extract_and_read_local_imports(ts_file_content, component_path):
+    # Regular expression to match local import statements
+    import_regex = r"import\s+.*\s+from\s+['\"](.*?)['\"]"
+    matches = re.findall(import_regex, ts_file_content)
+
+    # Filter for local files and read their contents
+    local_imports_content = {}
+    for match in matches:
+        if match.startswith('.'):
+            # Construct the full path for the local import
+            local_import_path = os.path.join(
+                os.path.dirname(component_path), match + '.ts')
+            if os.path.exists(local_import_path):
+                with open(local_import_path, 'r') as file:
+                    local_imports_content[match] = file.read()
+
+    return local_imports_content
+
+
 def generate_tests_for_component(component_path, associated_file_content=None):
     # Determine the base path for the test file
     test_base_path = component_path.replace('.ts', '.spec.ts')
@@ -63,13 +102,31 @@ def generate_tests_for_component(component_path, associated_file_content=None):
         with open(test_base_path, 'r') as file:
             existing_test_code = file.read()
 
+    # Extract and read contents of local imports
+    local_imports_content = extract_and_read_local_imports(
+        component_code, component_path)
+
+    # Combine all contents into a single message
+    combined_content = component_code
+    if associated_file_content:
+        combined_content += f"\n\nAssociated HTML file content:\n{associated_file_content}"
+
+    for import_path, import_content in local_imports_content.items():
+        combined_content += f"\n\nRelated file ({import_path}): {import_content}"
+
     # Call OpenAI to generate or update the test code
     test_code = call_openai_to_generate_test(
-        component_code, associated_file_content, existing_test_code)
+        combined_content, existing_test_code)
 
     if test_code is None:
         print(f"Failed to generate test for {component_path}")
         return None
+
+    # Output the generated test code for debugging purposes
+    print(f"\nGenerated test code for {component_path}:\n")
+    print("--------------------------------------------------")
+    print(test_code)
+    print("--------------------------------------------------\n")
 
     # Write the test code to the file
     with open(test_base_path, 'w') as file:
@@ -106,7 +163,7 @@ for component_path in changed_files:
     if associated_file_path:
         processed_files.add(associated_file_path)
 
-    # Send the .ts file and its associated .html file content (if available) to OpenAI
+    # This is where you call generate_tests_for_component
     test_file_path = generate_tests_for_component(
         component_path, associated_file_content)
     if test_file_path:

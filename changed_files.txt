@@ -1,3 +1,2 @@
-generate_tests.py
-src/app/app.component.html
-src/app/app.component.ts
+src/app/patient-list/patient-list.component.html
+src/app/patient-list/patient-list.component.ts
