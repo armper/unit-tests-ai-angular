@@ -1,7 +1,6 @@
 import openai
 import os
 import json
-import tiktoken
 
 import re
 
@@ -29,19 +28,6 @@ def call_openai_to_generate_test(component_code, associated_file_content=None, e
             "content": user_message
         }
     ]
-
-    # Integrate tiktoken
-    encoder = tiktoken.encoding_for_model("gpt-4")
-    num_tokens = len(encoder.encode(json.dumps(messages)))
-
-    print(f"Number of tokens in the message: {num_tokens}")
-
-    # Check if tokens exceed some limit (you can set a threshold)
-    TOKEN_LIMIT = 2048
-    if num_tokens > TOKEN_LIMIT:
-        print(
-            f"Error: Message too long ({num_tokens} tokens). Maximum allowed is {TOKEN_LIMIT}.")
-        return None
 
     # Print the message to be sent to ChatGPT
     print("\nSending to ChatGPT:")
