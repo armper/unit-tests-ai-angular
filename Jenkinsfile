@@ -7,27 +7,16 @@ pipeline {
 
     stages {
         stage('Clean Workspace and Checkout') {
-    steps {
-        // Clean the Jenkins workspace
-        deleteDir()
-        echo 'Cleaned the Jenkins workspace.'
+            steps {
+                // Clean the Jenkins workspace
+                deleteDir()
+                echo 'Cleaned the Jenkins workspace.'
 
-        // Checkout your code. Ensure we are not in a detached HEAD state by explicitly checking out a branch.
-        checkout scm
-        script {
-            // Check the current branch and switch to 'main' if necessary
-            def currentBranch = sh(script: "git branch --show-current", returnStdout: true).trim()
-            if (currentBranch != "main") {
-                sh "git checkout main"
-                echo "Checked out to 'main' branch."
-            } else {
-                echo "Already on 'main' branch."
+                // Checkout your code from the feature branch
+                checkout scm
+                echo 'Checked out the code.'
             }
         }
-        echo 'Checked out the code.'
-    }
-}
-
 
         stage('Analyze Changed Files') {
             steps {
@@ -98,7 +87,7 @@ pipeline {
                                 sh 'git config user.name "Jenkins AI"'
 
                                 // Add the file to git
-                                sh "git add --all"
+                                sh "git add ${path}"
 
                                 // Commit
                                 sh 'git commit -m "Add or update generated unit test for feature XYZ"'

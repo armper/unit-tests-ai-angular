@@ -13,6 +13,6 @@ export class PatientListComponent {
   onPatientUpdated($event: Patient): void {
     const index = this.patients.findIndex(patient => patient.name === $event.name);
     this.patients[index] = $event;
-  
+
   }
 }
