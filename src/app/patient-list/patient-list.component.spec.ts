@@ -21,7 +21,4 @@ describe('PatientListComponent', () => {
   });
 
  
-
-
-  
 });
