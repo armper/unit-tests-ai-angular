@@ -1,2 +1,0 @@
-src/app/patient-list/patient-list.component.html
-src/app/patient-list/patient-list.component.ts

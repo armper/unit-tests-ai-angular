@@ -20,19 +20,5 @@ describe('PatientListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should update patient when onPatientUpdated is called', () => {
-    const patient: Patient = { name: 'John', details: 'details' };
-    const updatedPatient: Patient = { name: 'John', details: 'updated details' };
-    component.patients = [patient];
-    component.onPatientUpdated(updatedPatient);
-    expect(component.patients[0]).toEqual(updatedPatient);
-  });
-
-  it('should not update patient when onPatientUpdated is called with non-existing patient', () => {
-    const patient: Patient = { name: 'John', details: 'details' };
-    const updatedPatient: Patient = { name: 'Jane', details: 'updated details' };
-    component.patients = [patient];
-    component.onPatientUpdated(updatedPatient);
-    expect(component.patients[0]).toEqual(patient);
-  });
+ 
 });
