@@ -1,6 +1,9 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { By } from '@angular/platform-browser';
+import { PatientPageComponent } from './patient-page/patient-page.component';
+import { PatientListComponent } from './patient-list/patient-list.component';
+import { PatientComponent } from './patient/patient.component';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -8,7 +11,7 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AppComponent]
+      declarations: [AppComponent, PatientPageComponent, PatientListComponent, PatientComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppComponent);
