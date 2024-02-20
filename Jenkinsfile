@@ -87,7 +87,7 @@ pipeline {
                                 sh 'git config user.name "Jenkins AI"'
 
                                 // Add the file to git
-                                sh "git add ${path}"
+                                sh "git add --all"
 
                                 // Commit
                                 sh 'git commit -m "Add or update generated unit test for feature XYZ"'
