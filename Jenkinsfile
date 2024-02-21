@@ -97,11 +97,11 @@ pipeline {
                         }
 
                         // Use credentials to push to the branch
-                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                            sh '''
-                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                '''
-                        }
+                        withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
+    sh '''
+git push https://$GITHUB_TOKEN@github.com/armper/unit-test-ai.git HEAD:main
+'''
+}
 
                         echo 'Committed and pushed the generated tests.'
                     }
