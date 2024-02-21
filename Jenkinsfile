@@ -67,26 +67,17 @@ pipeline {
           stage('Commit and Push Generated Test') {
             steps {
                 script {
-                        // Use Jenkins environment variable to get the branch name
-            def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH.split('/')[-1]
-            echo "Current branch is ${currentBranch}"
+                    // Generate a random number for the branch name
+                    def randomNumber = new Random().nextInt(999)
+                    def unitTestBranch = "unit-test-${randomNumber}"
+                    echo "Unit test branch will be ${unitTestBranch}"
 
-            // Define the unit test branch name
-            def unitTestBranch = "${currentBranch}-unitTest"
-            echo "Unit test branch will be ${unitTestBranch}"
+                    // Ensure local git configuration is set
+                    sh 'git config user.email "aleoperea@yahoo.com"'
+                    sh 'git config user.name "Jenkins AI"'
 
-                    // Fetch all branches from remote to update local info
-                    sh 'git fetch'
-
-                    // Check if the unit test branch exists on the remote
-                    def branchExists = sh(script: "git ls-remote --heads origin ${unitTestBranch}", returnStatus: true) == 0
-                    if (branchExists) {
-                        // Checkout the existing remote unit test branch
-                        sh "git checkout ${unitTestBranch}"
-                    } else {
-                        // Create and checkout a new local branch
-                        sh "git checkout -b ${unitTestBranch}"
-                    }
+                    // Create and checkout a new local branch
+                    sh "git checkout -b ${unitTestBranch}"
 
                     // Read the paths from the file
                     def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
@@ -99,10 +90,6 @@ pipeline {
                             if (path.trim()) {
                                 echo "Path to the generated test file: ${path}"
 
-                                // Set Git user name and email
-                                sh 'git config user.email "aleoperea@yahoo.com"'
-                                sh 'git config user.name "Jenkins AI"'
-
                                 // Add the file to git
                                 sh "git add ${path}"
 
@@ -113,12 +100,12 @@ pipeline {
                             }
                         }
 
-                        // Use credentials to push to the unit test branch, specifying the full branch reference
+                        // Use credentials to push to the new unit test branch
                         withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
-                            sh "git push https://${env.GITHUB_TOKEN}@github.com/armper/unit-test-ai.git ${unitTestBranch}:${unitTestBranch}"
+                            sh "git push https://${env.GITHUB_TOKEN}@github.com/armper/unit-test-ai.git ${unitTestBranch} --force"
                         }
 
-                        echo 'Committed and pushed the generated tests to the unit test branch.'
+                        echo 'Committed and pushed the generated tests to the new unit test branch.'
                     } else {
                         echo 'No files to commit and push.'
                     }
