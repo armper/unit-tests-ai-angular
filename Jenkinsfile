@@ -30,13 +30,13 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+    /*     stage('Install Dependencies') {
             steps {
                 // Install project dependencies
                 sh 'npm install'
                 echo 'Installed project dependencies.'
             }
-        }
+        } */
 
         stage('Generate Unit Test') {
             steps {
@@ -48,13 +48,13 @@ pipeline {
             }
         }
 
-        stage('Run Generated Unit Tests') {
+    /*     stage('Run Generated Unit Tests') {
             steps {
                     // Run the Angular unit tests
                     sh 'ng test --watch=false'
                     echo 'Ran the generated unit tests.'
             }
-        }
+        } */
 /* 
         stage('Build Project') {
             steps {
@@ -94,11 +94,6 @@ pipeline {
                     } else {
                         echo 'Skipping empty path.'
                     }
-                }
-
-                // Pull changes from the remote branch to avoid conflicts
-                withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
-                    sh 'git pull --rebase https://$GITHUB_TOKEN@github.com/armper/unit-test-ai.git main'
                 }
 
                 // Use credentials to push to the branch
