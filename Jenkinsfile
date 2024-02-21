@@ -102,7 +102,7 @@ pipeline {
 
                         // Use credentials to push to the new unit test branch
                         withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
-                            sh "git push https://${env.GITHUB_TOKEN}@github.com/armper/unit-test-ai.git ${unitTestBranch} --force"
+                            sh "git push https://${env.GITHUB_TOKEN}@github.com/armper/unit-tests-ai-angular.git ${unitTestBranch} --force"
                         }
 
                         echo 'Committed and pushed the generated tests to the new unit test branch.'
