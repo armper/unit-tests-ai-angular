@@ -65,48 +65,57 @@ pipeline {
         } */
 
         stage('Commit and Push Generated Test') {
-    steps {
-        script {
-            // Read the paths from the file
-            def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
+            steps {
+                script {
+                    // Capture the name of the current branch
+                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    echo "Current branch is ${currentBranch}"
 
-            // Convert the array to a List if it's a primitive array
-            if (testFilePaths instanceof String[]) {
-                testFilePaths = testFilePaths.toList()
-            }
+                    // Define the unit test branch name
+                    def unitTestBranch = "${currentBranch}-unitTest"
+                    echo "Unit test branch will be ${unitTestBranch}"
 
-            if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
-                echo 'No files to commit and push.'
-            } else {
-                testFilePaths.each { path ->
-                    if (path.trim()) { // Check if the path is not empty or just whitespaces
-                        echo "Path to the generated test file: ${path}"
+                    // Check if the unit test branch exists and switch to it, or create it if it doesn't exist
+                    sh "git checkout ${unitTestBranch} || git checkout -b ${unitTestBranch}"
 
-                        // Set Git user name and email
-                        sh 'git config user.email "aleoperea@yahoo.com"'
-                        sh 'git config user.name "Jenkins AI"'
+                    // Read the paths from the file
+                    def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
+                    // Convert the array to a List if it's a primitive array
+                    if (testFilePaths instanceof String[]) {
+                        testFilePaths = testFilePaths.toList()
+                    }
 
-                        // Add the file to git
-                        sh "git add ${path}"
-
-                        // Commit
-                        sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                    if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
+                        echo 'No files to commit and push.'
                     } else {
-                        echo 'Skipping empty path.'
+                        testFilePaths.each { path ->
+                            if (path.trim()) { // Check if the path is not empty or just whitespaces
+                                echo "Path to the generated test file: ${path}"
+
+                                // Set Git user name and email
+                                sh 'git config user.email "aleoperea@yahoo.com"'
+                                sh 'git config user.name "Jenkins AI"'
+
+                                // Add the file to git
+                                sh "git add ${path}"
+
+                                // Commit
+                                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                            } else {
+                                echo 'Skipping empty path.'
+                            }
+                        }
+
+                        // Use credentials to push to the unit test branch
+                        withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
+                            sh "git push https://$GITHUB_TOKEN@github.com/armper/unit-test-ai.git HEAD:${unitTestBranch}"
+                        }
+
+                        echo 'Committed and pushed the generated tests to the unit test branch.'
                     }
                 }
-
-                // Use credentials to push to the branch
-                withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
-                    sh 'git push https://$GITHUB_TOKEN@github.com/armper/unit-test-ai.git HEAD:main'
-                }
-
-                echo 'Committed and pushed the generated tests.'
             }
         }
-    }
-}
-
 
     // Other stages (e.g., deploy) as needed
     }
