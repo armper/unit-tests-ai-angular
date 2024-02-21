@@ -9,6 +9,7 @@ import { Patient } from '../patient/patient';
 export class PatientListComponent {
 
   @Input() patients: Patient[] = [];
+helloWorldText: any = 'Hello World!';
 
   onPatientUpdated($event: Patient): void {
     const index = this.patients.findIndex(patient => patient.name === $event.name);
@@ -16,3 +17,4 @@ export class PatientListComponent {
 
   }
 }
+ 
