@@ -67,13 +67,13 @@ pipeline {
           stage('Commit and Push Generated Test') {
             steps {
                 script {
-                    // Capture the name of the current branch
-                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "Current branch is ${currentBranch}"
+                        // Use Jenkins environment variable to get the branch name
+            def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH.split('/')[-1]
+            echo "Current branch is ${currentBranch}"
 
-                    // Define the unit test branch name
-                    def unitTestBranch = "${currentBranch}-unitTest"
-                    echo "Unit test branch will be ${unitTestBranch}"
+            // Define the unit test branch name
+            def unitTestBranch = "${currentBranch}-unitTest"
+            echo "Unit test branch will be ${unitTestBranch}"
 
                     // Fetch all branches from remote to update local info
                     sh 'git fetch'
