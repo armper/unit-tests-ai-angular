@@ -15,5 +15,5 @@ export class PatientListComponent {
     this.patients[index] = $event;
 
   }
-}
+}   
       
