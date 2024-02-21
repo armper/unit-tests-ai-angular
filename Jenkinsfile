@@ -64,7 +64,7 @@ pipeline {
             }
         } */
 
-        stage('Commit and Push Generated Test') {
+          stage('Commit and Push Generated Test') {
             steps {
                 script {
                     // Capture the name of the current branch
@@ -75,21 +75,28 @@ pipeline {
                     def unitTestBranch = "${currentBranch}-unitTest"
                     echo "Unit test branch will be ${unitTestBranch}"
 
-                    // Check if the unit test branch exists and switch to it, or create it if it doesn't exist
-                    sh "git checkout ${unitTestBranch} || git checkout -b ${unitTestBranch}"
+                    // Fetch all branches from remote to update local info
+                    sh 'git fetch'
+
+                    // Check if the unit test branch exists on the remote
+                    def branchExists = sh(script: "git ls-remote --heads origin ${unitTestBranch}", returnStatus: true) == 0
+                    if (branchExists) {
+                        // Checkout the existing remote unit test branch
+                        sh "git checkout ${unitTestBranch}"
+                    } else {
+                        // Create and checkout a new local branch
+                        sh "git checkout -b ${unitTestBranch}"
+                    }
 
                     // Read the paths from the file
                     def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
-                    // Convert the array to a List if it's a primitive array
                     if (testFilePaths instanceof String[]) {
                         testFilePaths = testFilePaths.toList()
                     }
 
-                    if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
-                        echo 'No files to commit and push.'
-                    } else {
+                    if (!testFilePaths.isEmpty() && !(testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
                         testFilePaths.each { path ->
-                            if (path.trim()) { // Check if the path is not empty or just whitespaces
+                            if (path.trim()) {
                                 echo "Path to the generated test file: ${path}"
 
                                 // Set Git user name and email
@@ -106,12 +113,14 @@ pipeline {
                             }
                         }
 
-                        // Use credentials to push to the unit test branch
+                        // Use credentials to push to the unit test branch, specifying the full branch reference
                         withCredentials([string(credentialsId: 'github-password', variable: 'GITHUB_TOKEN')]) {
-                            sh "git push https://$GITHUB_TOKEN@github.com/armper/unit-test-ai.git HEAD:${unitTestBranch}"
+                            sh "git push https://${env.GITHUB_TOKEN}@github.com/armper/unit-test-ai.git ${unitTestBranch}:${unitTestBranch}"
                         }
 
                         echo 'Committed and pushed the generated tests to the unit test branch.'
+                    } else {
+                        echo 'No files to commit and push.'
                     }
                 }
             }
